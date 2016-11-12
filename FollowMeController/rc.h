@@ -19,7 +19,7 @@ enum _controlMode {
 
 float followDistance = 1000; // centimeters
 float followAltitude = 800;  // centimeters 
-_controlMode controlMode = CM_OVERHEAD;
+_controlMode controlMode = CM_TURN_ONLY;
 
 boolean followMeEnabled = false;
 
@@ -70,4 +70,16 @@ void rc_loop() {
   else if ( followMeEnabled && ! followSwitchConditionsMet )
     exitFollowMeMode();
   followMeEnabled = followSwitchConditionsMet;
+  
+  /* // Example of setting control type from a switch
+  _controlMode oldMode = controlMode;
+
+  if ( rcChannels[RC_AUX3] < 1500 )
+    controlMode = CM_CIRCLE;
+  else 
+    controlMode = CM_FIXED_OFFSET;
+    
+  if ( controlMode != oldMode )
+    enterFollowMeMode();
+  */
 }
