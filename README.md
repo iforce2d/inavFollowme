@@ -2,11 +2,11 @@
 
 This project consists of three arduino sketches:
 
- - FollowMeTag - broadcasts position, altitude, velocity
- - FollowMeController - receives info from tag and communicates with Cleanflight flight controller
- - FollowMeChecker - a helper sketch to check that radio data is being sent correctly
+- FollowMeTag - broadcasts position, altitude, velocity
+- FollowMeController - receives info from tag and communicates with Cleanflight flight controller
+- FollowMeChecker - a helper sketch to check that radio data is being sent correctly
   
- Together the first two of these can be used to allow a quadcopter running Cleanflight iNav firmware to follow a point of interest as it moves, and aim a camera gimbal to keep that point in view. FollowMeTag will be attached to the point-of-interest, and FollowMeController will ride on the quadcopter.
+Together the first two of these can be used to allow a quadcopter running Cleanflight iNav firmware to follow a point of interest as it moves, and aim a camera gimbal to keep that point in view. FollowMeTag will be attached to the point-of-interest, and FollowMeController will ride on the quadcopter.
 
 There are various modes of control, listed below. In all modes the quad will turn to face the tag.
 

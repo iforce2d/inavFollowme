@@ -21,7 +21,7 @@ void setYaw(float degrees) {
 
 void gimbal_setup() {
   yawServo.attach(5);
-  pitchServo.attach(6);
+  pitchServo.attach(3);
   setPitch(0);
   setYaw(0);
 }
