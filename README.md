@@ -13,7 +13,7 @@ There are various modes of control, listed below. In all modes the quad will tur
 - turn only - the quad will not move anywhere
 - overhead - the quad will move to the same position as the tag
 - fixed offset - the quad will maintain a fixed relative lat/lon/alt from the tag
-- fixed radius - the quad will maintain a constant distance away from the quad horizontally
+- fixed radius - the quad will maintain a constant distance away from the tag horizontally
 - circle - the quad will rotate around the tag
 
 Additionally, the camera gimbal will turn to face the tag regardless of whether or not the follow-me system is active in the flight controller. For example, when flying fully manually or in other autonomous states such as return-to-home or waypoint mode, the camera gimbal will still face toward the tag.
@@ -30,7 +30,7 @@ The flight controller is expected to be running at VCC = 5v.
 
 (*optional*) The camera gimbal should be one that accepts regular servo signals (1000μs - 2000μs pulse width) to control the angle of view. For yaw control you will need a 3-axis gimbal. You may need to be able to modify the movement range of each axis. For example with the sketch as is, the pitch movement range is expected to be -90 to +90 degrees and the yaw is -180 to +180 degrees. I tested with the HAKRC 3-axis gimbal (https://goo.gl/og7awr) which runs the kick-ass STorM32 firmware and lets you customize dozens of other useful values such as how quickly the gimbal should turn etc.
 
-**FollowMeTag** requires an arduino (I used 5v pro-mini), GPS module, MS5611 barometer and nRF24L01 radio. With some modification of the code, you could make this without a barometer, but this is not recommended unless you'll only ever be using it on ground you know to be level.
+**FollowMeTag** requires an arduino (I used 5v pro-mini), u-blox GPS module (6 series or higher), MS5611 barometer and nRF24L01 radio. With some modification of the code, you could make this without a barometer, but this is not recommended unless you'll only ever be using it on ground you know to be level. The default GPS settings are to use a 10Hz update rate, if your GPS module is not capable of this you might have to modify the rate to a lower setting (in GPS.h)
 
 **FollowMeController** requires a 5v arduino (I used pro-mini) and nRF24L01 radio. Optionally, you can use a mini OLED screen to show status info, and a LED to show radio reception 'heartbeat'.
 
@@ -39,7 +39,7 @@ The flight controller is expected to be running at VCC = 5v.
 ## Implementation
 
 FollowMeController uses MSP (MultiWii Serial Protocol) to communicate with the Cleanflight iNav flight controller.  
-http://www.stefanocottafavi.com/msp-the-multiwii-serial-protocol/  
+http://www.stefanocottafavi.com/msp-the-multiwii-serial-protocol  
 http://www.multiwii.com/wiki/index.php?title=Multiwii_Serial_Protocol  
 
 MSP is a two-way protocol, allowing the onboard FollowMeController arduino to query information that the Cleanflight iNav flight controller knows. The arduino obtains the following MSP data:
@@ -76,7 +76,7 @@ The FollowMeController needs to know what switch positions signify that the foll
         rcChannels[RC_AUX1] > 1300 && rcChannels[RC_AUX1] < 1700 && // switch 1 mid
         rcChannels[RC_AUX2] > 1700; // switch 2 high
 
-This means that when I have my AUX1 switch in the middle position (about 1500μs) and my AUX2 switch high (about 2000μs) then the FollowMeController will know it is active. **You should edit this condition** to match the configuration of your switches when follow-me will be active.
+This means that when I have my AUX1 switch in the middle position (about 1500μs) and my AUX2 switch high (about 2000μs) then the FollowMeController will know it is active. **You should edit this condition** to match the configuration of your switches when follow-me will be active. You can look at the "Mode" value on the OLED screen of the FollowMeController to check that you have the right configuration (mode value will be 1 when the condition is met, zero otherwise).
 
 Currently the control mode to use is also hardcoded in rc.h:
 
@@ -134,6 +134,8 @@ In all modes the quad and gimbal will turn to face the tag, as long as the quad 
 The yaw range of the gimbal being -180 to 180 degrees, means that when the desired yaw angle of the gimbal crosses from the very low end to the high end, the gimbal will turn almost a full revolution. This can happen when the tag goes around directly behind the quad. On a gimbal with unlimited yaw rotation and a quad with retractable landing gear this would not be a problem, but most affordable gimbals do not have unlimited yaw rotation. However, since the quad also turns to face the tag, this situation should not arise often.
 
 Since the purpose of a camera gimbal is to smooth out sudden movements, it is rather sluggish to respond to change of pitch or yaw instructions. For a STorM32 controller you can improve this somewhat by increasing the "Rc Pitch Speed Limit" and "Pitch Pan" values (and same for yaw, see above example), but the yaw movement will most likely still be quite sluggish to respond when the quads adjusts its heading. The reason for this is that when the quad changes its heading, the 'local' yaw heading needed for the gimbal changes too. But until the MSP message comes through the new angle is not known, so there will always be a delay. (Side note, this problem would also be solved by an unlimited yaw gimbal, because then the pan mode could be set to 'hold hold hold'.)
+
+You may find that the resulting angle of the gimbal is a bit off. If you are using a STorM32 gimbal controller you can trim the RC inputs with the gimbal configuration program. You can also modify the trim values used in the setPitch() and setYaw() functions (in gimbal.h of FollowMeController). 
 
 **About barometric altitude measurements**  
 Altitude values for the tag and the quad are found by measuring air pressure. Please keep in mind that this is a pretty rough measurement and is a bit slow to react to changes in altitude sometimes. The relative altitude targets mentioned above are not really intended to handle quick changes in height like walking up a flight of stairs (although that might work out ok). They are more intended for gradual changes like walking over uneven ground, or a gradually sloping hill.
