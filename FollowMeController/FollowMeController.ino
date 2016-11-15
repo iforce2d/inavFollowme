@@ -3,6 +3,12 @@ Follow-me controller for cleanflight iNav.
 nRF24L01 library: https://github.com/gcopeland/RF24
 I2C OLED screen library: https://github.com/olikraus/u8glib
 
+Cleanflight connections
+GND - GND
+VCC - VCC
+RX - TX
+TX - RX
+
 nRF24L01 connections 
  1 - GND
  2 - VCC 3.3V !!! Ideally 3.0v, definitely not 5V
