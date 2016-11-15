@@ -18,23 +18,23 @@ There are various modes of control, listed below. In all modes the quad will tur
 
 Additionally, the camera gimbal will turn to face the tag regardless of whether or not the follow-me system is active in the flight controller. For example, when flying fully manually or in other autonomous states such as return-to-home or waypoint mode, the camera gimbal will still face toward the tag.
 
-You can see more details and usage examples in this YouTube video: TODO
+You can see more details and usage examples in this YouTube video: https://www.youtube.com/watch?v=fA5sFRh3OkY
 
 ## Requirements
 
 You will need a multirotor running Cleanflight iNav with all necessary sensors (baro, mag, gps) to be capable of autonomous functions, eg. position hold, return-to-home. 
-This has been tested with Cleanflight iNav v1.2 and 1.3.  
+This has been tested with Cleanflight iNav v1.2 and v1.3.  
 https://github.com/iNavFlight/inav  
-You will need a spare UART port to connect the arduino, used UART1 on a Flip32 which is shared with the USB, so I need to disconnect the arduino if I want to connect the flight controller to the Cleanflight configurator.
+You will need a spare UART port to connect the arduino, I used UART1 on a Flip32 which is shared with the USB, so I need to disconnect the arduino if I want to connect the flight controller to the Cleanflight configurator.
 The flight controller is expected to be running at VCC = 5v.
 
 (*optional*) The camera gimbal should be one that accepts regular servo signals (1000μs - 2000μs pulse width) to control the angle of view. For yaw control you will need a 3-axis gimbal. You may need to be able to modify the movement range of each axis. For example with the sketch as is, the pitch movement range is expected to be -90 to +90 degrees and the yaw is -180 to +180 degrees. I tested with the HAKRC 3-axis gimbal (https://goo.gl/og7awr) which runs the kick-ass STorM32 firmware and lets you customize dozens of other useful values such as how quickly the gimbal should turn etc.
 
-**FollowMeTag** requires an arduino (I used 5v pro-mini), u-blox GPS module (6 series or higher), MS5611 barometer and nRF24L01 radio. With some modification of the code, you could make this without a barometer, but this is not recommended unless you'll only ever be using it on ground you know to be level. The default GPS settings are to use a 10Hz update rate, if your GPS module is not capable of this you might have to modify the rate to a lower setting (in GPS.h)
+**FollowMeTag** requires an arduino (I used 3.3v pro-mini), u-blox GPS module (6 series or higher), MS5611 barometer and nRF24L01 radio. With some modification of the code, you could make this without a barometer, but this is not recommended unless you'll only ever be using it on ground you know to be level. The default GPS settings are to use a 10Hz update rate, if your GPS module is not capable of this you might have to modify the rate to a lower setting (in GPS.h)
 
 **FollowMeController** requires a 5v arduino (I used pro-mini) and nRF24L01 radio. Optionally, you can use a mini OLED screen to show status info, and a LED to show radio reception 'heartbeat'.
 
-**FollowMeChecker** requires an arduino (I used 5v pro-mini), mini OLED screen (I2C type) and nRF24L01 radio.
+**FollowMeChecker** requires an arduino, mini OLED screen (I2C type) and nRF24L01 radio.
 
 ## Implementation
 
@@ -49,7 +49,7 @@ MSP is a two-way protocol, allowing the onboard FollowMeController arduino to qu
 - MSP_ATTITUDE - for yaw
 - MSP_RC - for RC transmitter switch states
 
-Combined with the latitude/longitude/altitude being broadcast from the tag, the controller can calculate the necessary position and altitude to move to, the correct heading, and the gimbal angle for the camera. The controller sends a MSP_SET_WP message to Cleanflight to relay this info.
+Combined with the latitude/longitude/altitude being broadcast from the tag, the controller can calculate the necessary position and altitude to move to, the correct heading, and the gimbal angle for the camera. The controller sends a MSP_SET_WP message to Cleanflight to relay this info. This process occurs all the time, but the waypoint messages are ignored unless the GCS_NAV flight mode is active (along with its prerequisites like POSHOLD etc).
 
 ## Setup
 
@@ -94,7 +94,7 @@ Currently the control mode to use is also hardcoded in rc.h:
     if ( controlMode != oldMode )
         enterFollowMeMode();
         
-(When the mode type is changed, enterFollowMeMode() needs to be called again to reset the relative offsets.)
+(When the mode type is changed, enterFollowMeMode() should be called again to reset the relative offsets.)
 
 ## Usage
 
